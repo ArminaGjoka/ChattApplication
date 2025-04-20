@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat WebSocket Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #chat {
+            width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        #messages li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .message {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .message p {
+            margin: 0;
+        }
+        .message-time {
+            font-size: 0.8em;
+            color: #999;
+        }
+        #messageForm {
+            display: flex;
+        }
+        #messageForm input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px 0 0 10px;
+        }
+        #messageForm button {
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 10px 10px 0;
+        }
+        /* Custom colors */
+        body {
+            background-color: #E0BBE4;
+        }
+        #chat {
+            background-color: #FEC8D8;
+        }
+        #messages {
+            background-color: #FFDFD3;
+        }
+        #messageForm button {
+            background-color: #FF6F91;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <ul id="messages"></ul>
+        <form id="messageForm">
+            <input type="text" id="messageInput" autocomplete="off" placeholder="Type a message..." />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <script>
+        const ws = new WebSocket('ws://localhost:6969/ws?name=' + prompt('Enter your name:'));
+
+        ws.onmessage = function(event) {
+            const messages = document.getElementById('messages');
+            const message = document.createElement('li');
+            const time = new Date().toLocaleTimeString();
+            message.innerHTML = `<div class="message"><p>${event.data}</p><span class="message-time">${time}</span></div>`;
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;  
+        };
+
+        ws.onopen = function() {
+            console.log('Connected to the server');
+        };
+
+        ws.onclose = function() {
+            console.log('Disconnected from the server');
+        };
+
+        ws.onerror = function(error) {
+            console.error('WebSocket Error: ', error);
+        };
+
+        document.getElementById('messageForm').onsubmit = function(event) {
+            event.preventDefault();
+            const input = document.getElementById('messageInput');
+            if (input.value.trim() !== '') {
+                ws.send(input.value);
+                input.value = '';
+            }
+        };
+    </script>
+</body>
+</html>
